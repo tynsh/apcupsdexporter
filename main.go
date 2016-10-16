@@ -38,7 +38,7 @@ var config config_t
 //
 // We need to send the following request values:
 // - int16 specifying the length of the request message
-// - []byte array with the actual request message
+// - []byte slice with the actual request message
 // the status command is "status"
 func nis_request() string {
 
@@ -80,6 +80,7 @@ func nis_request() string {
 			break
 		}
 
+		// receive data from NIS
 		recv_buffer := make([]byte, length_response) // create buffer of the from nis reported message size
 		n, err := conn.Read(recv_buffer)
 		if err != nil {
@@ -94,14 +95,15 @@ func nis_request() string {
 	}
 	log.Debug("total size:", len(ServerResponse))
 
+	// convert []byte to string
 	ServerResponseString := string(ServerResponse)
 	log.Debug("Raw nis response:")
 	log.Debug(ServerResponseString)
 
-	//return ServerResponseString
 	return ServerResponseString
 }
 
+// configuration struct
 type config_t struct {
 	NISAddress        *string
 	webListenAddress  *string
@@ -125,6 +127,10 @@ func read_commandline() config_t {
 
 }
 
+// function to convert status value from NIS response to numeric metric
+// number returned is the sum of 2^statuscode where statuscode is a numeric
+// representation of a value reported from NIS. This conversion is neccessary
+// because the status reported from NIS may have multiple space separated values
 func convert_status(value string) float64 {
 	status_codes := map[string]float64{
 		"ONLINE":        0,
@@ -142,8 +148,11 @@ func convert_status(value string) float64 {
 		// COMMLOST not included, since it is an error
 	}
 
+	// trim spaces and split NIS reported values
 	value = strings.TrimSpace(value)
 	statuses := strings.Split(value, " ")
+
+	// sum all given values as powers of 2
 	var statuscode float64 = 0
 	for _, statusstring := range statuses {
 		statusstring = strings.TrimSpace(statusstring)
@@ -151,6 +160,7 @@ func convert_status(value string) float64 {
 			statuscode += math.Pow(2, status_code_to_add)
 		}
 	}
+
 	// if statuscode is 0, this means we either have no data (e.g. "N/A" value) or something else is wrong
 	return statuscode
 }
@@ -180,6 +190,7 @@ func convert_integer(value string) float64 {
 	return numeric_value
 }
 
+// struct containing initialized collectors
 type metrics_t struct {
 	status    prometheus.Gauge
 	linev     prometheus.Gauge
@@ -213,11 +224,10 @@ type metrics_t struct {
 	ambtemp   prometheus.Gauge
 }
 
-// define a global variable containing the metrics
+// collector struct must be global to be readable between scrapes
 var metrics metrics_t
 
-// Calls request function and returns all metrics as a string
-// Does not currently return neutral metrics when they were not returned by the NIS
+// request information from NIS and update metrics
 func update_metrics() {
 	raw_response := nis_request()
 
@@ -226,11 +236,13 @@ func update_metrics() {
 		raw_response = "STATUS:COMMLOST"
 	}
 
-	for _, line := range strings.Split(raw_response, "\n") { // loop over each line
+	// loop over each line of the nis response
+	for _, line := range strings.Split(raw_response, "\n") {
 		log.Debug(line)
 
+		// split line by colons, since NIS returns metrics in the form key:value
 		line = strings.TrimSpace(line)
-		split_line := strings.Split(line, ":") // split line into key and value
+		split_line := strings.Split(line, ":")
 
 		if len(split_line) == 2 { // must have exactly one colon, else not a metric
 			entry := strings.TrimSpace(split_line[0]) // trim spaces of entry and value
@@ -516,7 +528,7 @@ func update_metrics() {
 }
 
 // wrapper around the default gatherer, because we want to update the metrics
-// when the Gather function of the default gatherer is called.
+// before the Gather function of the default gatherer is called.
 func gatherer_wrapper() ([]*prommodel.MetricFamily, error) {
 	update_metrics()
 	return prometheus.DefaultGatherer.Gather()
@@ -525,13 +537,11 @@ func gatherer_wrapper() ([]*prommodel.MetricFamily, error) {
 func main() {
 	config = read_commandline()
 
+	// initialize http handler
 	var gatherer prometheus.GathererFunc = gatherer_wrapper
-	//:= prometheus.GathererFunc(update_metrics)
-
 	var handlerOpts promhttp.HandlerOpts
-	//handlerOpts.ErrorLog = log.Warn
-
 	http.Handle(*(config.HTTPEndpoint), promhttp.HandlerFor(gatherer, handlerOpts))
 
+	// start webserver
 	log.Fatal(http.ListenAndServe(*(config.webListenAddress), nil))
 }
