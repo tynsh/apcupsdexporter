@@ -25,20 +25,26 @@ The `apcupsd_ups_status` metric is a special case, since it may have multiple
 values at the same time. It is represented as the sum of powers of 2 with
 exponents from the following list:
 
-* "ONLINE": 0
-* "ONBATT": 1
-* "CAL": 2
-* "TRIM": 3
-* "BOOST": 4
-* "OVERLOAD": 5
-* "LOWBATT": 6
-* "REPLACEBATT": 7
-* "NOBATT": 8
-* "SLAVE": 9
-* "SLAVEDOWN": 10
-* "SHUTTING DOWN": 11
+* ONLINE: 0
+* ONBATT: 1
+* CAL: 2
+* TRIM: 3
+* BOOST: 4
+* OVERLOAD: 5
+* LOWBATT: 6
+* REPLACEBATT: 7
+* NOBATT: 8
+* SLAVE: 9
+* SLAVEDOWN: 10
+* SHUTTING DOWN: 11
 
 if a communication error occures, the value is set to zero.
+
+#### Example
+    STATUS:ONBATT LOWBATT
+    apcupsd_ups_status 66
+
+Because: `2^1 + 2^6 = 2 + 64 = 66`
 
 ###`apcupsd_ups_alarmdel`
 
@@ -50,11 +56,21 @@ The ALARMDEL metric is thanslated from the NIS response in the following way:
 * 5 Seconds: 4
 * Always: 5
 
-### Example
-    STATUS:ONBATT LOWBATT
-    apcupsd_ups_status 66
+###`apcupsd_ups_sense`
 
-Because: `2^1 + 2^6 = 2 + 64 = 66`
+* Auto Adjust: 1
+* Low: 2
+* Medium: 3
+* High: 4
+
+###`apcupsd_ups_selftest`
+
+* NO: 1
+* NG: 2
+* WN: 3
+* IP: 4
+* OK: 5
+* BT: 6
 
 # Building and running
 

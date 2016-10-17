@@ -165,10 +165,33 @@ func convert_status(value string) float64 {
 	return statuscode
 }
 
-// TODO: alarmdel
-// sense
-// selftest (?)
+// translation function for selftest metric
+func convert_selftest(value string) float64 {
+	status_codes := map[string]float64{
+		"NO": 1,
+		"NG": 2,
+		"WN": 3,
+		"IP": 4,
+		"OK": 5,
+		"BT": 6,
+		// "??" ist automatically set to 0
+	}
+	return status_codes[value]
+}
 
+// translation function for sense metric
+func convert_sense(value string) float64 {
+	status_codes := map[string]float64{
+		"Auto Adjust": 1,
+		"Low":         2,
+		"Medium":      3,
+		"High":        4,
+		// "Unknown" is automatically set to 0
+	}
+	return status_codes[value]
+}
+
+// translation function for alarmdel metric
 func convert_alarmdel(value string) float64 {
 	status_codes := map[string]float64{
 		"30 Seconds":  1,
@@ -236,6 +259,7 @@ type metrics_t struct {
 	extbatts  prometheus.Gauge
 	badbatts  prometheus.Gauge
 	cumonbatt prometheus.Gauge
+	selftest  prometheus.Gauge
 	humidity  prometheus.Gauge
 	ambtemp   prometheus.Gauge
 }
@@ -373,7 +397,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.sense)
 				}
-				metrics.sense.Set(convert_float64(value))
+				metrics.sense.Set(convert_sense(value))
 			case "DWAKE":
 				if metrics.dwake == nil {
 					metrics.dwake = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -518,6 +542,15 @@ func update_metrics() {
 					prometheus.MustRegister(metrics.cumonbatt)
 				}
 				metrics.cumonbatt.Set(convert_float64(value))
+			case "SELFTEST":
+				if metrics.selftest == nil {
+					metrics.selftest = prometheus.NewGauge(prometheus.GaugeOpts{
+						Name: "apcupsd_ups_selftest",
+						Help: "Selftest status",
+					})
+					prometheus.MustRegister(metrics.selftest)
+				}
+				metrics.selftest.Set(convert_selftest(value))
 			case "HUMIDITY":
 				if metrics.humidity == nil {
 					metrics.humidity = prometheus.NewGauge(prometheus.GaugeOpts{
