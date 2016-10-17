@@ -19,7 +19,7 @@ metric names are made from the following form:
 
 where `<metricname>` is the lowercase version of the apcupsd metric as seen in the output of apcaccess.
 
-# `apcupsd_ups_status`
+### `apcupsd_ups_status`
 
 The `apcupsd_ups_status` metric is a special case, since it may have multiple
 values at the same time. It is represented as the sum of powers of 2 with
@@ -40,7 +40,7 @@ exponents from the following list:
 
 if a communication error occures, the value is set to zero.
 
-# `apcupsd_ups_alarmdel`
+###`apcupsd_ups_alarmdel`
 
 The ALARMDEL metric is thanslated from the NIS response in the following way:
 
