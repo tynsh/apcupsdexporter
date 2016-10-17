@@ -19,6 +19,8 @@ metric names are made from the following form:
 
 where `<metricname>` is the lowercase version of the apcupsd metric as seen in the output of apcaccess.
 
+# `apcupsd_ups_status`
+
 The `apcupsd_ups_status` metric is a special case, since it may have multiple
 values at the same time. It is represented as the sum of powers of 2 with
 exponents from the following list:
@@ -37,6 +39,16 @@ exponents from the following list:
 * "SHUTTING DOWN": 11
 
 if a communication error occures, the value is set to zero.
+
+# `apcupsd_ups_alarmdel`
+
+The ALARMDEL metric is thanslated from the NIS response in the following way:
+
+* 30 Seconds: 1
+* Low Battery: 2
+* No allarm: 3
+* 5 Seconds: 4
+* Always: 5
 
 ### Example
     STATUS:ONBATT LOWBATT

@@ -165,9 +165,25 @@ func convert_status(value string) float64 {
 	return statuscode
 }
 
+// TODO: alarmdel
+// sense
+// selftest (?)
+
+func convert_alarmdel(value string) float64 {
+	status_codes := map[string]float64{
+		"30 Seconds":  1,
+		"Low Battery": 2,
+		"No alarm":    3,
+		"5 Seconds":   4,
+		"Always":      5,
+	}
+
+	return status_codes[value]
+}
+
 // converts a string value from nis to an int64
 // expects a string without trailing whitespaces
-func convert_integer(value string) float64 {
+func convert_float64(value string) float64 {
 	// first remove units
 	units := []string{
 		" Minutes",
@@ -267,7 +283,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.linev)
 				}
-				metrics.linev.Set(convert_integer(value))
+				metrics.linev.Set(convert_float64(value))
 			case "LOADPCT":
 				if metrics.loadpct == nil {
 					metrics.loadpct = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -276,7 +292,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.loadpct)
 				}
-				metrics.loadpct.Set(convert_integer(value))
+				metrics.loadpct.Set(convert_float64(value))
 			case "BCHARGE":
 				if metrics.bcharge == nil {
 					metrics.bcharge = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -285,7 +301,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.bcharge)
 				}
-				metrics.bcharge.Set(convert_integer(value))
+				metrics.bcharge.Set(convert_float64(value))
 			case "TIMELEFT":
 				if metrics.timeleft == nil {
 					metrics.timeleft = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -294,7 +310,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.timeleft)
 				}
-				metrics.timeleft.Set(convert_integer(value))
+				metrics.timeleft.Set(convert_float64(value))
 			case "MBATTCHG":
 				if metrics.mbattchg == nil {
 					metrics.mbattchg = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -303,7 +319,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.mbattchg)
 				}
-				metrics.mbattchg.Set(convert_integer(value))
+				metrics.mbattchg.Set(convert_float64(value))
 			case "MINTIMEL":
 				if metrics.mintimel == nil {
 					metrics.mintimel = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -312,7 +328,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.mintimel)
 				}
-				metrics.mintimel.Set(convert_integer(value))
+				metrics.mintimel.Set(convert_float64(value))
 			case "MAXTIME":
 				if metrics.maxtime == nil {
 					metrics.maxtime = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -321,7 +337,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.maxtime)
 				}
-				metrics.maxtime.Set(convert_integer(value))
+				metrics.maxtime.Set(convert_float64(value))
 			case "MAXLINEV":
 				if metrics.maxlinev == nil {
 					metrics.maxlinev = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -330,7 +346,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.maxlinev)
 				}
-				metrics.maxlinev.Set(convert_integer(value))
+				metrics.maxlinev.Set(convert_float64(value))
 			case "MINLINEV":
 				if metrics.minlinev == nil {
 					metrics.minlinev = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -339,7 +355,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.minlinev)
 				}
-				metrics.minlinev.Set(convert_integer(value))
+				metrics.minlinev.Set(convert_float64(value))
 			case "OUTPUTV":
 				if metrics.outputv == nil {
 					metrics.outputv = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -348,7 +364,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.outputv)
 				}
-				metrics.outputv.Set(convert_integer(value))
+				metrics.outputv.Set(convert_float64(value))
 			case "SENSE":
 				if metrics.sense == nil {
 					metrics.sense = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -357,7 +373,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.sense)
 				}
-				metrics.sense.Set(convert_integer(value))
+				metrics.sense.Set(convert_float64(value))
 			case "DWAKE":
 				if metrics.dwake == nil {
 					metrics.dwake = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -366,7 +382,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.dwake)
 				}
-				metrics.dwake.Set(convert_integer(value))
+				metrics.dwake.Set(convert_float64(value))
 			case "DSHUTD":
 				if metrics.dshutd == nil {
 					metrics.dshutd = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -375,7 +391,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.dshutd)
 				}
-				metrics.dshutd.Set(convert_integer(value))
+				metrics.dshutd.Set(convert_float64(value))
 			case "DLOWBATT":
 				if metrics.dlowbatt == nil {
 					metrics.dlowbatt = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -384,7 +400,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.dlowbatt)
 				}
-				metrics.dlowbatt.Set(convert_integer(value))
+				metrics.dlowbatt.Set(convert_float64(value))
 			case "LOTRANS":
 				if metrics.lotrans == nil {
 					metrics.lotrans = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -393,7 +409,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.lotrans)
 				}
-				metrics.lotrans.Set(convert_integer(value))
+				metrics.lotrans.Set(convert_float64(value))
 			case "HITRANS":
 				if metrics.hitrans == nil {
 					metrics.hitrans = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -402,7 +418,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.hitrans)
 				}
-				metrics.hitrans.Set(convert_integer(value))
+				metrics.hitrans.Set(convert_float64(value))
 			case "RETPCT":
 				if metrics.retpct == nil {
 					metrics.retpct = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -411,7 +427,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.retpct)
 				}
-				metrics.retpct.Set(convert_integer(value))
+				metrics.retpct.Set(convert_float64(value))
 			case "ITEMP":
 				if metrics.itemp == nil {
 					metrics.itemp = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -420,7 +436,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.itemp)
 				}
-				metrics.itemp.Set(convert_integer(value))
+				metrics.itemp.Set(convert_float64(value))
 			case "ALARMDEL":
 				if metrics.alarmdel == nil {
 					metrics.alarmdel = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -429,7 +445,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.alarmdel)
 				}
-				metrics.alarmdel.Set(convert_integer(value))
+				metrics.alarmdel.Set(convert_alarmdel(value))
 			case "BATTV":
 				if metrics.battv == nil {
 					metrics.battv = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -438,7 +454,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.battv)
 				}
-				metrics.battv.Set(convert_integer(value))
+				metrics.battv.Set(convert_float64(value))
 			case "LINEFREQ":
 				if metrics.linefreq == nil {
 					metrics.linefreq = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -447,7 +463,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.linefreq)
 				}
-				metrics.linefreq.Set(convert_integer(value))
+				metrics.linefreq.Set(convert_float64(value))
 			case "TONBATT":
 				if metrics.tonbatt == nil {
 					metrics.tonbatt = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -456,7 +472,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.tonbatt)
 				}
-				metrics.tonbatt.Set(convert_integer(value))
+				metrics.tonbatt.Set(convert_float64(value))
 			case "NOMOUTV":
 				if metrics.nomoutv == nil {
 					metrics.nomoutv = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -465,7 +481,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.nomoutv)
 				}
-				metrics.nomoutv.Set(convert_integer(value))
+				metrics.nomoutv.Set(convert_float64(value))
 			case "NOMBATTV":
 				if metrics.nombattv == nil {
 					metrics.nombattv = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -474,7 +490,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.nombattv)
 				}
-				metrics.nombattv.Set(convert_integer(value))
+				metrics.nombattv.Set(convert_float64(value))
 			case "EXTBATTS":
 				if metrics.extbatts == nil {
 					metrics.extbatts = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -483,7 +499,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.extbatts)
 				}
-				metrics.extbatts.Set(convert_integer(value))
+				metrics.extbatts.Set(convert_float64(value))
 			case "BADBATTS":
 				if metrics.badbatts == nil {
 					metrics.badbatts = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -492,7 +508,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.badbatts)
 				}
-				metrics.badbatts.Set(convert_integer(value))
+				metrics.badbatts.Set(convert_float64(value))
 			case "CUMONBATT":
 				if metrics.cumonbatt == nil {
 					metrics.cumonbatt = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -501,7 +517,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.cumonbatt)
 				}
-				metrics.cumonbatt.Set(convert_integer(value))
+				metrics.cumonbatt.Set(convert_float64(value))
 			case "HUMIDITY":
 				if metrics.humidity == nil {
 					metrics.humidity = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -510,7 +526,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.humidity)
 				}
-				metrics.humidity.Set(convert_integer(value))
+				metrics.humidity.Set(convert_float64(value))
 			case "AMBTEMP":
 				if metrics.ambtemp == nil {
 					metrics.ambtemp = prometheus.NewGauge(prometheus.GaugeOpts{
@@ -519,7 +535,7 @@ func update_metrics() {
 					})
 					prometheus.MustRegister(metrics.ambtemp)
 				}
-				metrics.ambtemp.Set(convert_integer(value))
+				metrics.ambtemp.Set(convert_float64(value))
 			default:
 				// do nothing because the entry is not an interesting metric
 			}
