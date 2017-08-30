@@ -22,29 +22,35 @@ where `<metricname>` is the lowercase version of the apcupsd metric as seen in t
 ### `apcupsd_ups_status`
 
 The `apcupsd_ups_status` metric is a special case, since it may have multiple
-values at the same time. It is represented as the sum of powers of 2 with
-exponents from the following list:
+values at the same time. It uses the label "type" to describe which type of
+state the ups reports. A value of 1 represents the state as being reported, 0
+means it is not. The following are all possible states:
 
-* ONLINE: 0
-* ONBATT: 1
-* CAL: 2
-* TRIM: 3
-* BOOST: 4
-* OVERLOAD: 5
-* LOWBATT: 6
-* REPLACEBATT: 7
-* NOBATT: 8
-* SLAVE: 9
-* SLAVEDOWN: 10
-* SHUTTING DOWN: 11
+* ONLINE
+* ONBATT
+* CAL
+* COMMLOST
+* TRIM
+* BOOST
+* OVERLOAD
+* LOWBATT
+* REPLACEBATT
+* NOBATT
+* SLAVE
+* SLAVEDOWN
+* SHUTTING DOWN
 
-if a communication error occures, the value is set to zero.
+If the exporter itself is not able to contact the NIS the COMMLOST type is set
+to 1.
 
 #### Example
     STATUS:ONBATT LOWBATT
-    apcupsd_ups_status 66
-
-Because: `2^1 + 2^6 = 2 + 64 = 66`
+    apcupsd_ups_status{type="BOOST"} 0
+    apcupsd_ups_status{type="LOWBATT"} 1
+    apcupsd_ups_status{type="ONBATT"} 1
+    apcupsd_ups_status{type="CAL"} 0
+    apcupsd_ups_status{type="OVERLOAD"} 0
+    …
 
 ###`apcupsd_ups_alarmdel`
 

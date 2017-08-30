@@ -1,4 +1,4 @@
-//   Copyright 2016 Tobias Wackenhut
+//   Copyright 2016-2017 Tobias Wackenhut
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import (
 	prommodel "github.com/prometheus/client_model/go"
 	log "github.com/prometheus/common/log"
 	"io"
-	"math"
 	"net"
 	"net/http"
 	"strconv"
@@ -127,42 +126,31 @@ func read_commandline() config_t {
 
 }
 
-// function to convert status value from NIS response to numeric metric
-// number returned is the sum of 2^statuscode where statuscode is a numeric
-// representation of a value reported from NIS. This conversion is neccessary
-// because the status reported from NIS may have multiple space separated values
-func convert_status(value string) float64 {
-	status_codes := map[string]float64{
-		"ONLINE":        0,
-		"ONBATT":        1,
-		"CAL":           2,
-		"TRIM":          3,
-		"BOOST":         4,
-		"OVERLOAD":      5,
-		"LOWBATT":       6,
-		"REPLACEBATT":   7,
-		"NOBATT":        8,
-		"SLAVE":         9,
-		"SLAVEDOWN":     10,
-		"SHUTTING DOWN": 11,
-		// COMMLOST not included, since it is an error
+// the status value is a whitespace separated list of ups state types.
+// Create a GaugeVec metric with the sole label "type" and ups state "tags" as
+// values.
+//
+// a value of 1 for one of these metrics represents the tag as being reported
+// by the ups. 0 means it is not reported.
+func update_status(value string, statusmetric *prometheus.GaugeVec) {
+	valid_statuscodes := []string{"ONLINE", "ONBATT", "CAL", "TRIM", "BOOST", "OVERLOAD", "LOWBATT", "REPLACEBATT", "NOBATT", "SLAVE", "SLAVEDOWN", "SHUTTING DOWN", "COMMLOST"}
+
+	if statusmetric == nil {
+		statusmetric = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Name: "apcupsd_ups_status",
+			Help: "UPS Status",
+		},
+		[]string{"type"})
+		prometheus.MustRegister(statusmetric)
 	}
 
-	// trim spaces and split NIS reported values
-	value = strings.TrimSpace(value)
-	statuses := strings.Split(value, " ")
-
-	// sum all given values as powers of 2
-	var statuscode float64 = 0
-	for _, statusstring := range statuses {
-		statusstring = strings.TrimSpace(statusstring)
-		if status_code_to_add, noError := status_codes[statusstring]; noError {
-			statuscode += math.Pow(2, status_code_to_add)
+	for _, code := range valid_statuscodes {
+		if strings.Contains(value, code) {
+			statusmetric.With(prometheus.Labels{"type": code}).Set(1)
+		} else {
+			statusmetric.With(prometheus.Labels{"type": code}).Set(0)
 		}
 	}
-
-	// if statuscode is 0, this means we either have no data (e.g. "N/A" value) or something else is wrong
-	return statuscode
 }
 
 // translation function for selftest metric
@@ -174,7 +162,7 @@ func convert_selftest(value string) float64 {
 		"IP": 4,
 		"OK": 5,
 		"BT": 6,
-		// "??" ist automatically set to 0
+		// "??" is automatically set to 0
 	}
 	return status_codes[value]
 }
@@ -231,7 +219,7 @@ func convert_float64(value string) float64 {
 
 // struct containing initialized collectors
 type metrics_t struct {
-	status    prometheus.Gauge
+	status    *prometheus.GaugeVec
 	linev     prometheus.Gauge
 	loadpct   prometheus.Gauge
 	bcharge   prometheus.Gauge
@@ -291,14 +279,7 @@ func update_metrics() {
 			// switch over the possible entrys and create metrics on demand
 			switch entry {
 			case "STATUS":
-				if metrics.status == nil {
-					metrics.status = prometheus.NewGauge(prometheus.GaugeOpts{
-						Name: "apcupsd_ups_status",
-						Help: "UPS Status. Value 0=error 1=ONLINE, for the rest see documentation",
-					})
-					prometheus.MustRegister(metrics.status)
-				}
-				metrics.status.Set(convert_status(value))
+				update_status(value, metrics.status)
 			case "LINEV":
 				if metrics.linev == nil {
 					metrics.linev = prometheus.NewGauge(prometheus.GaugeOpts{
