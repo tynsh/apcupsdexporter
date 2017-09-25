@@ -95,4 +95,4 @@ You can specify the address of the NIS and the http endpoint using the commandli
     -web.endpoint string
           HTTP Endpoint for metrics (default "/metrics")
     -web.listenaddress string
-          colon separated host and port to listen on for metric requests (default ":9191")
+          colon separated host and port to listen on for metric requests (default ":9385")
