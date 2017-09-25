@@ -27,6 +27,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"fmt"
 )
 
 // config needs to be stored globaly because we cannot give arguments to the
@@ -132,7 +133,7 @@ func read_commandline() config_t {
 //
 // a value of 1 for one of these metrics represents the tag as being reported
 // by the ups. 0 means it is not reported.
-func update_status(value string, statusmetric *prometheus.GaugeVec) {
+func update_status(value string, statusmetric *prometheus.GaugeVec) *prometheus.GaugeVec {
 	valid_statuscodes := []string{"ONLINE", "ONBATT", "CAL", "TRIM", "BOOST", "OVERLOAD", "LOWBATT", "REPLACEBATT", "NOBATT", "SLAVE", "SLAVEDOWN", "SHUTTING DOWN", "COMMLOST"}
 
 	if statusmetric == nil {
@@ -143,6 +144,7 @@ func update_status(value string, statusmetric *prometheus.GaugeVec) {
 		[]string{"type"})
 		prometheus.MustRegister(statusmetric)
 	}
+	fmt.Print(statusmetric)
 
 	for _, code := range valid_statuscodes {
 		if strings.Contains(value, code) {
@@ -151,6 +153,8 @@ func update_status(value string, statusmetric *prometheus.GaugeVec) {
 			statusmetric.With(prometheus.Labels{"type": code}).Set(0)
 		}
 	}
+
+	return statusmetric
 }
 
 // translation function for selftest metric
@@ -279,7 +283,7 @@ func update_metrics() {
 			// switch over the possible entrys and create metrics on demand
 			switch entry {
 			case "STATUS":
-				update_status(value, metrics.status)
+				metrics.status = update_status(value, metrics.status)
 			case "LINEV":
 				if metrics.linev == nil {
 					metrics.linev = prometheus.NewGauge(prometheus.GaugeOpts{
