@@ -116,7 +116,7 @@ func read_commandline() config_t {
 	var config config_t
 
 	config.NISAddress = flag.String("nis.address", "localhost:3551", "colon separated host and port of the Network information Server to monitor")
-	config.webListenAddress = flag.String("web.listenaddress", ":9191", "colon separated host and port to listen on for metric requests")
+	config.webListenAddress = flag.String("web.listenaddress", ":9385", "colon separated host and port to listen on for metric requests")
 	config.HTTPEndpoint = flag.String("web.endpoint", "/metrics", "HTTP Endpoint for metrics")
 	config.NISRequestTimeout = flag.Int("nis.timeout", 30, "timeout lengh for requests to the Network information Server")
 
